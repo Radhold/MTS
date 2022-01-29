@@ -15,14 +15,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         if #available(iOS 13, *) {
-            // do only pure app launch stuff, not interface stuff
+            
         } else {
             self.window = UIWindow()
             let vc = MainController()
-            self.window!.rootViewController = vc
+            let nav = UINavigationController(rootViewController: vc)
+            self.window!.rootViewController = nav
             self.window!.makeKeyAndVisible()
         }
-        // Override point for customization after application launch.
         return true
     }
     

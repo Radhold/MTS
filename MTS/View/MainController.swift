@@ -7,13 +7,18 @@
 import CoreLocation
 import UIKit
 
-class MainController: UIViewController, CLLocationManagerDelegate {
+protocol MainVCProtocol: AnyObject {
+    
+}
+
+class MainController: UIViewController, MainVCProtocol, CLLocationManagerDelegate {
+    
+    var presenter: MainPresenterProtocol!
+    
     let locationManager = CLLocationManager()
     
     let searchBar: UISearchBar = {
         $0.translatesAutoresizingMaskIntoConstraints = false
-//        $0.showsCancelButton = true
-//        $0.setShowsCancelButton(true, animated: true)
         return $0
     }(UISearchBar())
     
@@ -27,8 +32,12 @@ class MainController: UIViewController, CLLocationManagerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         self.configure()
+//        if let location = self.locationManager.location{
+//            presenter.getWeatherViaCoord(lon: location.coordinate.longitude, lat: location.coordinate.latitude, type: "current")
+//        }
+        presenter.getWeatherViaCoord(lon: 0, lat: 0, type: "current")
+        locationManager.stopUpdatingLocation()
     }
     
     override func viewDidLayoutSubviews() {
@@ -64,13 +73,16 @@ class MainController: UIViewController, CLLocationManagerDelegate {
     func configure() {
         self.view.addSubview(searchBar)
         self.view.addSubview(collectionView)
+        self.title = "Погода"
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: Settings.degreeType, style: .plain, target: self, action: #selector(pressButton(sender:)))
+        presenter = MainPresenter(view: self)
+        presenter.output = self
         collectionView.delegate = self
         collectionView.dataSource = self
         searchBar.delegate = self
         self.locationManager.requestAlwaysAuthorization()
         self.locationManager.requestWhenInUseAuthorization()
         if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
-//            layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
             collectionView.collectionViewLayout = layout
         }
         if CLLocationManager.locationServicesEnabled() {
@@ -79,27 +91,62 @@ class MainController: UIViewController, CLLocationManagerDelegate {
             locationManager.startUpdatingLocation()
         }
     }
+    
+    @objc func pressButton(sender: Any){
+        if let _ = sender as? UIBarButtonItem{
+            presenter.buttonPressed(type: "UIBarButtonItem")
+            DispatchQueue.main.async {
+                self.navigationItem.rightBarButtonItem?.title = Settings.degreeType
+            }
+            
+        }
+    }
 
 
 }
 
 extension MainController: UICollectionViewDelegate, UICollectionViewDataSource{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        if !presenter.currentWeather.isEmpty{
+            return 10
+        }
+        else {
+            return 0
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.create(cell: WeatherCell.self, at: indexPath)
-        cell.tempNow.text = "-11"
-        cell.image.image = UIImage(named: "01d")
-        cell.city.text = "Moscow"
+        let element = presenter.currentWeather[0]
+        
+        cell.weatherImage.image = UIImage(named: element.weather.first!.icon)
+        cell.thermoImage.image = UIImage(named: Settings.degreeType)
+        if Settings.degreeType == "C°"{
+            cell.thermo.text = "Сейчас: \(element.main.temp.description.toCelsius()). "
+                                + "Ощущается: \(element.main.feelsLike.description.toCelsius()). "
+                                + "Макс: \(element.main.tempMax.description.toCelsius()). "
+                                + "Мин: \(element.main.tempMin.description.toCelsius())."
+        }
+        else {
+            cell.thermo.text = "Сейчас: \(element.main.temp.description.toFarenheit()). "
+                                + "Ощущается: \(element.main.feelsLike.description.toFarenheit()). "
+                                + "Макс: \(element.main.tempMax.description.toFarenheit()). "
+                                + "Мин: \(element.main.tempMin.description.toFarenheit())."
+            
+        }
+        
+        cell.city.text = element.name
+        cell.time.text = element.dt.formatTime(timeZone: element.timezone)
+        if let windDeg = element.wind.deg, let windSpeed = element.wind.speed {
+            cell.wind.text = "\(windDeg.windDirection()). Скорость ветра \(windSpeed) м/c."
+        }
         return cell
     }
 }
 
 extension MainController: UICollectionViewDelegateFlowLayout{
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: self.view.frame.width - 20, height: 100)
+        return CGSize(width: self.view.frame.width - 20, height: 160)
     }
 }
 
@@ -122,44 +169,16 @@ extension MainController: UISearchBarDelegate {
            searchBar.setShowsCancelButton(true, animated: true)
        }
 }
-extension UICollectionView {
-    
-    func create<A: CellProtocol>(cell: A.Type, at index: IndexPath) -> A {
-        return self.dequeueReusableCell(withReuseIdentifier: cell.name, for: index) as! A
-    }
-    
-    func register<A: CellProtocol>(classXIB: A.Type) {
-        let cell = UINib(nibName: classXIB.name, bundle: nil)
-        self.register(cell, forCellWithReuseIdentifier: classXIB.name)
-    }
-    
-    func register<A: CellProtocol>(classCell: A.Type) {
-        self.register(classCell.self, forCellWithReuseIdentifier: classCell.name)
-    }
-    
-}
 
-extension UITableView {
-    
-    func create<A: CellProtocol>(cell: A.Type) -> A {
-        self.dequeueReusableCell(withIdentifier: cell.name) as! A
+extension MainController: MainPresenterOutput {
+    func success() {
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
+        }
     }
     
-    func create<A: CellProtocol>(cell: A.Type, at index: IndexPath) -> A {
-        self.dequeueReusableCell(withIdentifier: cell.name, for: index) as! A
+    func failure(error: Error) {
+        
     }
-    
-    func register<A: CellProtocol>(classCell: A.Type) {
-        self.register(classCell.self, forCellReuseIdentifier: classCell.name)
-    }
-    
-    func register(nibName name: String, forCellReuseIdentifier identifier: String) {
-        let someNib = UINib(nibName: name, bundle: nil)
-        self.register(someNib, forCellReuseIdentifier: identifier)
-    }
-}
-
-protocol CellProtocol: UIView {
-    static var name: String { get }
 }
 
