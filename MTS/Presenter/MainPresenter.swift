@@ -8,10 +8,10 @@
 import Foundation
 
 protocol MainPresenterProtocol {
-    func getWeatherViaCoord(lon: Double, lat: Double, type: String) -> Void
+    func getCoord(lon: Double, lat: Double, type: String) -> Void
     func getWeatherViaId(id: [Int], type: String) -> Void
     func removeFromFav(id: Int) -> Void
-    func searchCity(name: String) -> [City]
+    func inputCity(name: String) -> [City]
     func buttonPressed(type: String)
     var currentWeather: [CurrentWeather] { get set }
     var output: MainPresenterOutput? { get set }
@@ -33,6 +33,7 @@ final class MainPresenter: MainPresenterProtocol{
     
     private var weatherManager: WeatherManagerProtocol = WeatherManager.shared
     
+    private lazy var city = Set<City>()
     weak var view: MainVCProtocol!
     weak var output: MainPresenterOutput?
     
@@ -40,13 +41,20 @@ final class MainPresenter: MainPresenterProtocol{
     
     init(view: MainVCProtocol) {
         self.view = view
+        if let data = readLocalFile(forName: "cityList") {
+            parseJSON(jsonData: data)
+        }
+//        print(inputCity(name: "mos"))
     }
     
-    func searchCity(name: String) -> [City] {
-        return [City(id: 0, name: "", state: "", country: "", coord: Coordinate(lon: 0, lat: 0))]
+    func inputCity(name: String) -> [City] {
+        let result = city.filter{
+            $0.name[0..<name.count].lowercased().contains(name.lowercased())
+        }
+        return Array(result)
     }
     
-    func getWeatherViaCoord(lon: Double, lat: Double, type: String) {
+    func getCoord(lon: Double, lat: Double, type: String) {
 //        weatherManager.load(ofType: CurrentWeather.self, url: "https://api.openweathermap.org/data/2.5/weather?lon=\(lon)&lat=\(lat)&lang=ru", via: "")
         weatherManager.load(ofType: CurrentWeather.self, url: "https://api.openweathermap.org/data/2.5/weather?q=London&lang=ru", via: "")
         weatherManager.output = self
@@ -58,6 +66,30 @@ final class MainPresenter: MainPresenterProtocol{
     
     func removeFromFav(id: Int) {
         
+    }
+    
+    func readLocalFile(forName name: String) -> Data? {
+        do {
+            if let bundlePath = Bundle.main.path(forResource: name,
+                                                 ofType: "json"),
+                let jsonData = try String(contentsOfFile: bundlePath).data(using: .utf8) {
+                return jsonData
+            }
+        } catch {
+            print(error)
+        }
+        
+        return nil
+    }
+    
+    func parseJSON(jsonData: Data) {
+            do {
+                city = try JSONDecoder().decode(Set<City>.self,
+                                                           from: jsonData)
+//                print(city.first)
+            } catch {
+                print("decode error")
+            }
     }
 }
 

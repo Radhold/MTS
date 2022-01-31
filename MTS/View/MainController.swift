@@ -16,27 +16,37 @@ class MainController: UIViewController, MainVCProtocol, CLLocationManagerDelegat
     var presenter: MainPresenterProtocol!
     
     let locationManager = CLLocationManager()
-    
-    let searchBar: UISearchBar = {
-        $0.translatesAutoresizingMaskIntoConstraints = false
+    //
+    //        let searchBar: UISearchBar = {
+    //            $0.translatesAutoresizingMaskIntoConstraints = false
+    //            return $0
+    //        }(UISearchBar())
+    //
+    let searchController: UISearchController = {
+        $0.obscuresBackgroundDuringPresentation = false
         return $0
-    }(UISearchBar())
+    }(UISearchController(searchResultsController: nil))
     
-    let collectionView: UICollectionView = {
+    lazy var searchResultController: SearchResultController = {
+        return $0
+    } (SearchResultController(result: [City(id: 0, name: "", state: "", country: "", coord: Coordinate(lon: 0, lat: 0))]))
+    
+    let tableView: UITableView = {
+        $0.separatorStyle = .none
         $0.translatesAutoresizingMaskIntoConstraints = false
         $0.register(classCell: WeatherCell.self)
         $0.backgroundColor = .white
         $0.isScrollEnabled = true
         return $0
-    }(UICollectionView(frame: CGRect.zero, collectionViewLayout: UICollectionViewFlowLayout.init()))
+    }(UITableView(frame: CGRect.zero, style: .plain))
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configure()
-//        if let location = self.locationManager.location{
-//            presenter.getWeatherViaCoord(lon: location.coordinate.longitude, lat: location.coordinate.latitude, type: "current")
-//        }
-        presenter.getWeatherViaCoord(lon: 0, lat: 0, type: "current")
+        //        if let location = self.locationManager.location{
+        //            presenter.getWeatherViaCoord(lon: location.coordinate.longitude, lat: location.coordinate.latitude, type: "current")
+        //        }
+        presenter.getCoord(lon: 0, lat: 0, type: "current")
         locationManager.stopUpdatingLocation()
     }
     
@@ -60,31 +70,38 @@ class MainController: UIViewController, MainVCProtocol, CLLocationManagerDelegat
     func layout() {
         
         NSLayoutConstraint.activate([
-            searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            searchBar.heightAnchor.constraint(equalToConstant: 50),
-            collectionView.widthAnchor.constraint(equalTo: view.widthAnchor),
-            collectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 10),
-            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            //            searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            //            searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            //            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            //            searchBar.heightAnchor.constraint(equalToConstant: 50),
+            tableView.widthAnchor.constraint(equalTo: view.widthAnchor),
+            tableView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+            //            collectionView.topAnchor.constraint(equalTo: self.searchBar.bottomAnchor, constant: 10),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
     }
     
     func configure() {
-        self.view.addSubview(searchBar)
-        self.view.addSubview(collectionView)
+        //        self.view.addSubview(searchController)
+        //        self.view.addSubview(searchBar)
+        self.view.addSubview(tableView)
         self.title = "Погода"
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: Settings.degreeType, style: .plain, target: self, action: #selector(pressButton(sender:)))
         presenter = MainPresenter(view: self)
         presenter.output = self
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        searchBar.delegate = self
+        tableView.delegate = self
+        tableView.dataSource = self
+        //        searchBar.delegate = self
+        definesPresentationContext = true
+        searchController.searchBar.delegate = self
+        
+        navigationItem.searchController = searchController
+        navigationItem.searchController?.searchBar.placeholder = "Поиск"
         self.locationManager.requestAlwaysAuthorization()
         self.locationManager.requestWhenInUseAuthorization()
-        if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
-            collectionView.collectionViewLayout = layout
-        }
+//        if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+//            collectionView.collectionViewLayout = layout
+//        }
         if CLLocationManager.locationServicesEnabled() {
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
@@ -101,37 +118,30 @@ class MainController: UIViewController, MainVCProtocol, CLLocationManagerDelegat
             
         }
     }
-
-
+    
+    
 }
 
-extension MainController: UICollectionViewDelegate, UICollectionViewDataSource{
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if !presenter.currentWeather.isEmpty{
-            return 10
-        }
-        else {
-            return 0
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.create(cell: WeatherCell.self, at: indexPath)
+extension MainController: UITableViewDelegate, UITableViewDataSource{
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.create(cell: WeatherCell.self, at: indexPath)
+        cell.selectionStyle = .none
         let element = presenter.currentWeather[0]
         
         cell.weatherImage.image = UIImage(named: element.weather.first!.icon)
         cell.thermoImage.image = UIImage(named: Settings.degreeType)
         if Settings.degreeType == "C°"{
             cell.thermo.text = "Сейчас: \(element.main.temp.description.toCelsius()). "
-                                + "Ощущается: \(element.main.feelsLike.description.toCelsius()). "
-                                + "Макс: \(element.main.tempMax.description.toCelsius()). "
-                                + "Мин: \(element.main.tempMin.description.toCelsius())."
+            + "Ощущается: \(element.main.feelsLike.description.toCelsius()). "
+            + "Макс: \(element.main.tempMax.description.toCelsius()). "
+            + "Мин: \(element.main.tempMin.description.toCelsius())."
         }
         else {
             cell.thermo.text = "Сейчас: \(element.main.temp.description.toFarenheit()). "
-                                + "Ощущается: \(element.main.feelsLike.description.toFarenheit()). "
-                                + "Макс: \(element.main.tempMax.description.toFarenheit()). "
-                                + "Мин: \(element.main.tempMin.description.toFarenheit())."
+            + "Ощущается: \(element.main.feelsLike.description.toFarenheit()). "
+            + "Макс: \(element.main.tempMax.description.toFarenheit()). "
+            + "Мин: \(element.main.tempMin.description.toFarenheit())."
+            
             
         }
         
@@ -142,38 +152,85 @@ extension MainController: UICollectionViewDelegate, UICollectionViewDataSource{
         }
         return cell
     }
-}
-
-extension MainController: UICollectionViewDelegateFlowLayout{
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: self.view.frame.width - 20, height: 160)
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 180
+        
     }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return presenter.currentWeather.count * 10
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
 }
 
-extension MainController: UISearchBarDelegate {
+//extension MainController: UICollectionViewDelegateFlowLayout{
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        return CGSize(width: self.view.frame.width - 20, height: 170)
+//    }
+//}
+
+extension MainController: UISearchBarDelegate, UIPopoverPresentationControllerDelegate {
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        searchBar.setShowsCancelButton(true, animated: true)
+        
+    }
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        if let text = searchBar.text, !text.isEmpty {
+            self.view.endEditing(true)
+        }
+    }
+    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        // Do some search stuff
+        if searchText.count <= 2 {
+            searchResultController.result = []
+            if let _ = searchResultController.presentingViewController as? UINavigationController {
+                searchResultController.tableView.reloadData()
+            }
+        }
+        else if searchText.count > 2 {
+            searchResultController.result = presenter.inputCity(name: searchText)
+            if let _ = searchResultController.presentingViewController as? UINavigationController {
+                searchResultController.tableView.reloadData()
+            }
+            else {
+                searchResultController.modalPresentationStyle = .popover
+                searchResultController.preferredContentSize = CGSize(width: view.frame.width - 100, height: view.frame.height - 300)
+                let popover = searchResultController.popoverPresentationController
+                popover?.permittedArrowDirections = .up
+                popover?.delegate = self
+                popover?.sourceView = self.searchController.searchBar
+                popover?.sourceRect = CGRect(x: searchController.searchBar.center.x, y: searchController.searchBar.frame.maxY, width: 1, height: 1)
+                present(searchResultController, animated: false, completion: nil)
+            }
+        }
+        
+        //        }
     }
-
+    
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         // Stop doing the search stuff
         // and clear the text in the search bar
         searchBar.text = ""
-        // Hide the cancel button
         searchBar.setShowsCancelButton(false, animated: true)
-        self.view.endEditing(true)
-        // You could also change the position, frame etc of the searchBar
+        self.searchController.searchBar.endEditing(true)
     }
     
-    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-           searchBar.setShowsCancelButton(true, animated: true)
-       }
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        .none
+    }
 }
 
 extension MainController: MainPresenterOutput {
     func success() {
         DispatchQueue.main.async {
-            self.collectionView.reloadData()
+            self.tableView.reloadData()
         }
     }
     

@@ -7,7 +7,7 @@
 
 import UIKit
 
-class WeatherCell: UICollectionViewCell, CellProtocol {
+class WeatherCell: UITableViewCell, CellProtocol {
     static var name: String = "WeatherCell"
     
     let weatherImage: UIImageView = {
@@ -63,15 +63,25 @@ class WeatherCell: UICollectionViewCell, CellProtocol {
         return $0
     }(UILabel())
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        contentView.addSubview(weatherImage)
-        contentView.addSubview(thermoImage)
-        contentView.addSubview(city)
-        contentView.addSubview(thermo)
-        contentView.addSubview(time)
-        contentView.addSubview(windImage)
-        contentView.addSubview(wind)
+    lazy var view: UIView = {
+        $0.translatesAutoresizingMaskIntoConstraints = false
+        $0.clipsToBounds = true
+        $0.layer.masksToBounds = true
+        $0.layer.cornerRadius = 20
+        $0.backgroundColor = UIColor(red: 2/3, green: 2/3, blue: 2/3, alpha: 0.3)
+        return $0
+    }(UIView(frame: CGRect.zero))
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: .default, reuseIdentifier: reuseIdentifier)
+        contentView.addSubview(view)
+        view.addSubview(weatherImage)
+        view.addSubview(thermoImage)
+        view.addSubview(city)
+        view.addSubview(thermo)
+        view.addSubview(time)
+        view.addSubview(windImage)
+        view.addSubview(wind)
     }
     
     required init?(coder: NSCoder) {
@@ -80,11 +90,8 @@ class WeatherCell: UICollectionViewCell, CellProtocol {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        self.contentView.clipsToBounds = true
-        self.contentView.layer.masksToBounds = true
-        self.layer.cornerRadius = 20
+        
         self.layout()
-        self.backgroundColor = UIColor(red: 2/3, green: 2/3, blue: 2/3, alpha: 0.3)
     }
     
     override func prepareForReuse() {
@@ -101,18 +108,21 @@ class WeatherCell: UICollectionViewCell, CellProtocol {
         
         
         NSLayoutConstraint.activate([
-
+            view.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 10),
+            view.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -10),
+            view.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 5),
+            view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5),
             weatherImage.heightAnchor.constraint(equalToConstant: 40),
             weatherImage.widthAnchor.constraint(equalToConstant: 40),
-            weatherImage.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 10),
-            weatherImage.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 5),
+            weatherImage.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 10),
+            weatherImage.topAnchor.constraint(equalTo: view.topAnchor, constant: 5),
             
             city.leftAnchor.constraint(equalTo: weatherImage.rightAnchor, constant: 10),
             city.bottomAnchor.constraint(equalTo: weatherImage.bottomAnchor, constant: -4),
             
             time.widthAnchor.constraint(equalToConstant: 70),
             time.centerYAnchor.constraint(equalTo: city.centerYAnchor),
-            time.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -10),
+            time.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10),
             city.rightAnchor.constraint(equalTo: time.leftAnchor),
         
             
