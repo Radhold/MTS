@@ -24,6 +24,7 @@
 		A88AA33D27A5A05A00DB43E9 /* CityList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88AA33C27A5A05A00DB43E9 /* CityList.swift */; };
 		A88AA33F27A5A56900DB43E9 /* WeatherOneCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88AA33E27A5A56900DB43E9 /* WeatherOneCall.swift */; };
 		A88AA34127A5A8D900DB43E9 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88AA34027A5A8D900DB43E9 /* Extensions.swift */; };
+		A899647727A8544B00F1E521 /* DetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A899647627A8544B00F1E521 /* DetailsViewController.swift */; };
 		A8D2684027A420BE00DCA926 /* WeatherCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8D2683F27A420BE00DCA926 /* WeatherCell.swift */; };
 		A8DF0FD727A6E3BA001BB60B /* cityList.json in Resources */ = {isa = PBXBuildFile; fileRef = A8DF0FD627A6E3BA001BB60B /* cityList.json */; };
 		A8DF0FD927A71BDF001BB60B /* SearchResultController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DF0FD827A71BDF001BB60B /* SearchResultController.swift */; };
@@ -49,6 +50,7 @@
 		A88AA33C27A5A05A00DB43E9 /* CityList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityList.swift; sourceTree = "<group>"; };
 		A88AA33E27A5A56900DB43E9 /* WeatherOneCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherOneCall.swift; sourceTree = "<group>"; };
 		A88AA34027A5A8D900DB43E9 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		A899647627A8544B00F1E521 /* DetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsViewController.swift; sourceTree = "<group>"; };
 		A8D2683F27A420BE00DCA926 /* WeatherCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCell.swift; sourceTree = "<group>"; };
 		A8DF0FD627A6E3BA001BB60B /* cityList.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = cityList.json; sourceTree = "<group>"; };
 		A8DF0FD827A71BDF001BB60B /* SearchResultController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultController.swift; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 				A88A5C1E27A7269300F2D83B /* SearchResultCell.swift */,
 				A88A5C2027A75AEA00F2D83B /* DayWeatherCell.swift */,
 				A88A5C2227A75EF400F2D83B /* HourlyWeatherCell.swift */,
+				A899647627A8544B00F1E521 /* DetailsViewController.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -221,6 +224,7 @@
 				A8D2684027A420BE00DCA926 /* WeatherCell.swift in Sources */,
 				A88AA33F27A5A56900DB43E9 /* WeatherOneCall.swift in Sources */,
 				A88AA33327A5945700DB43E9 /* NetworkManager.swift in Sources */,
+				A899647727A8544B00F1E521 /* DetailsViewController.swift in Sources */,
 				A86B4C4127A30B250012C1F2 /* SceneDelegate.swift in Sources */,
 				A88A5C2327A75EF400F2D83B /* HourlyWeatherCell.swift in Sources */,
 				A88AA34127A5A8D900DB43E9 /* Extensions.swift in Sources */,

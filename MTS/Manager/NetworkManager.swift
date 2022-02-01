@@ -18,14 +18,14 @@ final class NetworkManager: NetworkManagerProtocol {
     
     func get<T:Codable>(ofType: T.Type, url: String, completion: @escaping (Result<T?, Error>) -> Void){
         guard let request = formRequest(url: url + token) else {return}
-        print(url+token)
+//        print(url+token)
         URLSession.shared.dataTask(with: request) {data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return
             }
             do {
-                print(String(data: data!, encoding: .utf8))
+//                print(String(data: data!, encoding: .utf8))
                 let decoder = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 let obj = try decoder.decode(ofType, from: data!)
@@ -43,7 +43,7 @@ final class NetworkManager: NetworkManagerProtocol {
         }
         
         var request = URLRequest(url: url)
-        request.cachePolicy = .reloadIgnoringCacheData
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.httpMethod = "GET"
         
         return request

@@ -80,22 +80,22 @@ class DayWeatherCell: UITableViewCell, CellProtocol {
     
     private func layout() {
         NSLayoutConstraint.activate([
-            date.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 5),
+            date.topAnchor.constraint(equalTo: contentView.topAnchor),
             date.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 5),
-            date.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 5),
+            date.bottomAnchor.constraint(equalTo: bottomAnchor),
             date.widthAnchor.constraint(equalToConstant: 50),
             
             weatherImage.topAnchor.constraint(equalTo: date.topAnchor),
             weatherImage.widthAnchor.constraint(equalToConstant: 30),
             weatherImage.heightAnchor.constraint(equalToConstant: 30),
-            weatherImage.leftAnchor.constraint(equalTo: date.rightAnchor),
+            weatherImage.leftAnchor.constraint(equalTo: date.rightAnchor, constant: 10),
             
             precipitation.topAnchor.constraint(equalTo: weatherImage.bottomAnchor, constant: 5),
-            precipitation.bottomAnchor.constraint(equalTo: date.bottomAnchor),
-            precipitation.centerYAnchor.constraint(equalTo: weatherImage.centerYAnchor),
+//            precipitation.bottomAnchor.constraint(equalTo: date.bottomAnchor),
+            precipitation.centerXAnchor.constraint(equalTo: weatherImage.centerXAnchor),
             
-            temp.leftAnchor.constraint(equalTo: weatherImage.rightAnchor, constant: 5),
-            temp.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant:  -5),
+            temp.leftAnchor.constraint(equalTo: weatherImage.rightAnchor, constant: 10),
+            temp.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant:  -10),
             temp.centerYAnchor.constraint(equalTo: date.centerYAnchor),
             
             

@@ -7,9 +7,9 @@
 
 import UIKit
 
-class HourlyWeatherCell: UICollectionViewCell {
+class HourlyWeatherCell: UICollectionViewCell, CellProtocol {
     
-    static var name: String = "DayWeatherCell"
+    static var name: String = "HourlyWeatherCell"
     
     let date: UILabel = {
         $0.translatesAutoresizingMaskIntoConstraints = false
@@ -44,6 +44,10 @@ class HourlyWeatherCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        contentView.addSubview(date)
+        contentView.addSubview(weatherImage)
+        contentView.addSubview(precipitation)
+        contentView.addSubview(temp)
     }
     
     required init?(coder: NSCoder) {
@@ -81,6 +85,7 @@ class HourlyWeatherCell: UICollectionViewCell {
             
             temp.topAnchor.constraint(equalTo: precipitation.bottomAnchor),
             temp.centerXAnchor.constraint(equalTo: precipitation.centerXAnchor),
+            
             
             
             

@@ -12,14 +12,14 @@ struct Coordinate: Hashable, Codable{
     let lat: Double
 }
 
-struct WeatherDescription: Codable {
+struct WeatherDescription: Codable, Hashable {
     let id: Int
     let main: String
     let description: String
     let icon: String
 }
 
-struct Main: Codable{
+struct Main: Codable, Hashable{
     let temp: Double
     let feelsLike: Double
     let tempMin: Double
@@ -28,28 +28,34 @@ struct Main: Codable{
     let humidity: Int
 }
 
-struct Wind: Codable{
+struct Wind: Codable, Hashable{
     let speed: Double?
     let deg: Int?
     let gust: Double?
 }
 
-struct Sys: Codable{
-    let id: Int
+struct Sys: Codable, Hashable{
+    let id: Int?
     let country: String
     let sunrise: Int
     let sunset: Int
+    let timezone: Int?
 }
 
-struct CurrentWeather: Codable {
+struct CurrentWeather: Codable, Hashable {
     let coord: Coordinate
     let weather: [WeatherDescription]
     let main: Main
     let wind: Wind
     let sys: Sys
     let dt: Int
-    let timezone: Int
+    let timezone: Int?
     let id: Int
     let name: String
-    let cod: Int
+    let cod: Int?
+}
+
+struct groupCurrent: Codable {
+    let cnt: Int
+    let list: [CurrentWeather]
 }

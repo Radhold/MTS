@@ -9,11 +9,12 @@ import UIKit
 
 class SearchResultController: UITableViewController, UIPopoverPresentationControllerDelegate {
     
-    var result: [City] = [City(id: 0, name: "Moscow", state: "", country: "ru", coord: Coordinate(lon: 0, lat: 0))]
-    
-    required init(result: [City]){
+    var result: [City] = [City]()
+    weak var output: MainVCProtocol?
+    required init(result: [City], output: MainVCProtocol){
         super.init(nibName: nil, bundle: nil)
         self.result = result
+        self.output = output
     }
     
     required init?(coder: NSCoder) {
@@ -37,7 +38,7 @@ class SearchResultController: UITableViewController, UIPopoverPresentationContro
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.create(cell: SearchResultCell.self, at: indexPath)
-        cell.selectionStyle = .none
+//        cell.selectionStyle = .none
         let element = result[indexPath.row]
         cell.city.text = "\(element.name), \(element.country)"
         return cell
@@ -53,7 +54,25 @@ class SearchResultController: UITableViewController, UIPopoverPresentationContro
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let vc: DetailsViewProtocol = DetailsViewController()
+        guard let detailVC = vc as? DetailsViewController else {return}
+//        detailVC.weather = presenter.oneCallWeather[0]
+        let element = result[indexPath.row]
+        detailVC.city = element.name
+        detailVC.id = element.id
+        detailVC.coord = Coordinate(lon: element.coord.lon, lat: element.coord.lon)
+        detailVC.modalPresentationStyle = .currentContext
+        detailVC.output = self.output
+        self.navigationController?.pushViewController(detailVC, animated: true)
         
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+//        self.result = []
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+        }
     }
     
 

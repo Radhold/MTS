@@ -45,6 +45,9 @@ extension UITableView {
     }
 }
 extension String {
+    var firstUppercased: String { prefix(1).uppercased() + dropFirst() }
+    var firstCapitalized: String { prefix(1).capitalized + dropFirst() }
+    
     func toCelsius () -> String {
         var temp = Double(self) ?? 0
         temp -= 273.15
@@ -79,6 +82,24 @@ extension Int {
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "ru_RU")
         dateFormatter.dateFormat = "HH:mm"
+        dateFormatter.timeZone = TimeZone(abbreviation: "GMT")
+        return dateFormatter.string(from: date)
+    }
+    
+    func formatHour (timeZone: Int) -> String {
+        let date = Date(timeIntervalSince1970: Double(self + timeZone))
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "ru_RU")
+        dateFormatter.dateFormat = "HH"
+        dateFormatter.timeZone = TimeZone(abbreviation: "GMT")
+        return dateFormatter.string(from: date)
+    }
+    
+    func formatDay (timeZone: Int) -> String {
+        let date = Date(timeIntervalSince1970: Double(self + timeZone))
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "ru_RU")
+        dateFormatter.dateFormat = "dd.MM"
         dateFormatter.timeZone = TimeZone(abbreviation: "GMT")
         return dateFormatter.string(from: date)
     }
@@ -120,6 +141,12 @@ extension Int {
         default:
             return "Нет ветра"
         }
+    }
+    
+    func convertPressure () -> String {
+        var result = Double(self)/1.333
+        result.round()
+        return String(Int(result))
     }
 }
 

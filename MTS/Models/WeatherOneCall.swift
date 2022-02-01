@@ -35,7 +35,7 @@ struct CurrentWeatherOneCall: Codable {
     let humidity: Int
     let windSpeed: Double?
     let windDeg: Int?
-    let weather: WeatherDescription
+    let weather: [WeatherDescription]
 }
 
 struct OneCall: Codable {
@@ -43,8 +43,8 @@ struct OneCall: Codable {
     let lon: Double
     let timezoneOffset: Int
     let current: CurrentWeatherOneCall?
-    let hourly: HourlyWeather?
-    let daily: DailyWeather?
+    let hourly: [HourlyWeather]?
+    let daily: [DailyWeather]?
 }
 
 
